@@ -1,4 +1,4 @@
-module.exports = { showHelp, getPrice, getMarketData, getCoinDataByDate };
+module.exports = { showHelp, getPrice, getMarketData, getCoinDataByDate, getArgs, getCompareList };
 const axios = require('axios')
 
 const usage = "\nUsage: Crypto <something_here> things";
@@ -8,14 +8,14 @@ function showHelp() {
     console.log(usage);  
     console.log('\nOptions:\r')  
     console.log('\t--version\t      ' + 'Show version number.' + '\t\t' + '[boolean]\r')  
-    console.log('    -l, --languages\t' + '      ' + 'List all languages.' + '\t\t' + '[boolean]\r')  
+    console.log('    -l, --Something\t' + '      ' + 'Something Something.' + '\t\t' + '[boolean]\r')  
     console.log('\t--help\t\t      ' + 'Show help.' + '\t\t\t' + '[boolean]\n')  
 }
 
 
-async function getPrice(coin) {
+async function getPrice(coin, currency = "usd") {
 
-    const data = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=usd`).then(response => response.data)
+    const data = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=${currency}`).then(response => response.data)
     if (!data[coin]) {
         throw new Error("Coin Not Found")
     }
@@ -41,4 +41,23 @@ async function getCoinDataByDate(coin, date) {
         throw new Error ("Error: ", err.response.data.error)
     }
     return data
+}
+
+async function getCompareList() {
+    let data
+    try {
+         data = await axios.get(`https://api.coingecko.com/api/v3/simple/supported_vs_currencies`).then(response => response.data)
+    } catch (err) {
+        throw new Error ("Error: ", err.response.data.error)
+    }
+    return data
+}
+
+
+function getArgs(argsIn) {
+    if (JSON.stringify(argsIn).toLowerCase().includes("comparelist")) {
+     return "comparelist"
+    } else if (JSON.stringify(argsIn).toLowerCase().includes("coin")) {
+        return "coin"
+ }
 }

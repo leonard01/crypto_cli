@@ -1,4 +1,7 @@
 #! /usr/bin/env node
+
+const { demandOption, argv } = require("yargs");
+
 (async () => {
 const yargs = require("yargs")
 const utils = require("./utils.js")
@@ -11,31 +14,54 @@ yargs
     .help(true)  
     .argv;
 
+    //crypto price commands
 yargs.command({
     command: 'price',
     describe: 'Return coin price',
     builder: {
-        coin:
-        {
+        coin: {
             describe:'Coin To Price',
-            demandOption: 'true', // required
+            demandOption: false, 
+            type: 'string'
+        },
+        currency: {
+            describe: 'Currency for comparison, USD by default',
+            demandOption: false,
+            type: 'string'           
+        },
+        comparelist: {
+            describe: 'Available currencies for comparision',
+            demandOption: false,
             type: 'string'
         }
     },
-   async handler(argv) {
-       const res =  await utils.getPrice(argv.coin)
-        console.log("Result for ", 
-            (argv.coin) + " \n" +
-            JSON.stringify(res))
+    async handler() {
+
+        switch (utils.getArgs(argv)) {
+            case "comparelist":
+                const compareRes = await utils.getCompareList()
+                console.log(compareRes)
+                break;
+            case "coin":
+                let currency
+                if (argv.currency) {
+                   currency = argv.currency
+               }
+               const priceRes =  await utils.getPrice(argv.coin, currency)
+                console.log("Result for ", 
+                    (argv.coin) + " \n" +
+                    JSON.stringify(priceRes))
+                break;
+        }
     }
-})
- 
+})  
+    
+ // crypto market commands
 yargs.command({
     command: 'market',
     describe: 'Return market data',
     builder: {
-        coin:
-        {
+        coin: {
             describe:'Coin to return market data for',
             demandOption: 'true', // required
             type: 'string'
@@ -53,14 +79,12 @@ yargs.command({
     command: 'data',
     describe: 'Return coin data by date',
     builder: {
-        coin:
-        {
+        coin: {
             describe:'Coin to return data for',
             demandOption: 'true', // required
             type: 'string'
         },
-        date:
-        {
+        date: {
             describe: 'Date for returned data in format 30-12-2020',
             demandOption: 'true', // todo: default to today,
             type: 'string' // date type?
@@ -74,7 +98,5 @@ yargs.command({
     }
 })
 
-
-
-yargs.parse() // To set above changes
+yargs.parse() 
 })()
