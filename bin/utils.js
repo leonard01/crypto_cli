@@ -1,6 +1,7 @@
-module.exports = { showHelp, getPrice, getMarketData, getCoinDataByDate, getArgs, getCompareList };
+module.exports = { showHelp, getPrice, getMarketData, getCoinDataByDate, getArgs, getCompareList, getExchangeRates };
 const axios = require('axios')
 
+const prefix = 'https://api.coingecko.com/api/v3/'
 const usage = "\nUsage: Crypto <something_here> things";
 
 
@@ -14,8 +15,7 @@ function showHelp() {
 
 
 async function getPrice(coin, currency = "usd") {
-
-    const data = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=${currency}`).then(response => response.data)
+    const data = await axios.get(`${prefix}simple/price?ids=${coin}&vs_currencies=${currency}`).then(response => response.data)
     if (!data[coin]) {
         throw new Error("Coin Not Found")
     }
@@ -24,19 +24,22 @@ async function getPrice(coin, currency = "usd") {
 
 
 async function getMarketData(coin) {
-    
-    const data = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coin}&order=market_cap_desc&per_page=100&page=1&sparkline=false`).then(response => response.data)
-    // todo add error handling for coin not found
+    let data
+    try {
+      data = await axios.get(`${prefix}coins/markets?vs_currency=usd&ids=${coin}&order=market_cap_desc&per_page=100&page=1&sparkline=false`).then(response => response.data)
+    } catch (err) {
+        throw new Error ("Error: ", err.response.data.error)
+    }
     return data
 
 }
 
 
-async function getCoinDataByDate(coin, date) {
-    // todo: add date validation
+async function getCoinDataByDate(coin, date = getTodayDate()) {
+
     let data
     try {
-         data = await axios.get(`https://api.coingecko.com/api/v3/coins/${coin}/history?date=${date}`).then(response => response.data)
+         data = await axios.get(`${prefix}coins/${coin}/history?date=${date}`).then(response => response.data)
     } catch (err) {
         throw new Error ("Error: ", err.response.data.error)
     }
@@ -46,18 +49,57 @@ async function getCoinDataByDate(coin, date) {
 async function getCompareList() {
     let data
     try {
-         data = await axios.get(`https://api.coingecko.com/api/v3/simple/supported_vs_currencies`).then(response => response.data)
+         data = await axios.get(`${prefix}simple/supported_vs_currencies`).then(response => response.data)
     } catch (err) {
         throw new Error ("Error: ", err.response.data.error)
     }
     return data
 }
 
+async function getExchangeRates() {
+    let data
+    try {
+         data = await axios.get(`${prefix}exchange_rates`).then(response => response.data)
+    } catch (err) {
+        throw new Error ("Error: ", err.response.data.error)
+    }
+    return data
 
+}
+
+//to change to switch
 function getArgs(argsIn) {
     if (JSON.stringify(argsIn).toLowerCase().includes("comparelist")) {
      return "comparelist"
-    } else if (JSON.stringify(argsIn).toLowerCase().includes("coin")) {
+    }
+    if (JSON.stringify(argsIn).toLowerCase().includes("coin")) {
         return "coin"
- }
+    }
+    if (JSON.stringify(argsIn).toLowerCase().includes("exchangerate")) {
+        return "exchangerate"
+    }
+}
+
+
+function getTodayDate() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    let mm = today.getMonth() + 1; // Months start at 0!
+    let dd = today.getDate();
+
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+
+    const formattedToday = dd + '-' + mm + '-' + yyyy;
+    return formattedToday
+}
+
+
+function randomInvestmentAdvice() {
+    
+    const rand = Math.random()
+    console.log(rand)
+    switch (rand) {
+        case 
+    }
 }

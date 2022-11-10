@@ -29,30 +29,41 @@ yargs.command({
             demandOption: false,
             type: 'string'           
         },
+        exchangerate: {
+            describe: 'Btc Exchange Rates',
+            demandOption: false,
+            type: 'string'         
+        },
         comparelist: {
             describe: 'Available currencies for comparision',
             demandOption: false,
             type: 'string'
         }
     },
-    async handler() {
 
+    async handler() {
+        let currency
         switch (utils.getArgs(argv)) {
             case "comparelist":
                 const compareRes = await utils.getCompareList()
                 console.log(compareRes)
                 break;
             case "coin":
-                let currency
                 if (argv.currency) {
-                   currency = argv.currency
-               }
-               const priceRes =  await utils.getPrice(argv.coin, currency)
-                console.log("Result for ", 
+                    currency = argv.currency
+                }
+                const priceRes = await utils.getPrice(argv.coin, currency)
+                console.log("Result for ",
                     (argv.coin) + " \n" +
                     JSON.stringify(priceRes))
                 break;
-        }
+            case "exchangerate":
+                const exchangeRes = await utils.getExchangeRates()
+                console.log(exchangeRes)
+                break;
+            default:
+                throw new Error("Invalid Args Passed")
+        }     
     }
 })  
     
@@ -81,12 +92,12 @@ yargs.command({
     builder: {
         coin: {
             describe:'Coin to return data for',
-            demandOption: 'true', // required
+            demandOption: true,
             type: 'string'
         },
         date: {
             describe: 'Date for returned data in format 30-12-2020',
-            demandOption: 'true', // todo: default to today,
+            demandOption: false,
             type: 'string' // date type?
         }
     },
