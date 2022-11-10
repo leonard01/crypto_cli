@@ -86,6 +86,7 @@ yargs.command({
     }
 })
 
+    // get coin data on specific date
 yargs.command({
     command: 'data',
     describe: 'Return coin data by date',
@@ -106,6 +107,14 @@ yargs.command({
         console.log("Result for ", 
             (argv.coin) + " on date " + (argv.date) + " \n" +
             JSON.stringify(res))
+    }
+})
+    
+yargs.command({
+    command: 'investment',
+    describe: 'Completely 100% legit and not random investment advice',
+    async handler() {
+        utils.randomInvestmentAdvice()
     }
 })
 
